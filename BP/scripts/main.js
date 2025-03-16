@@ -10,28 +10,31 @@ const woodBlocks = new Set([
     'minecraft:mangrove_log',
     'minecraft:cherry_log',
     'minecraft:crimson_stem',
-    'minecraft:warped_stem',
+    'minecraft:warped_stem'
 ]);
 
 world.beforeEvents.playerBreakBlock.subscribe(e => {
-    const { block, player } = e;
+    const {block,dimension,player} = e;
     const hand = player.getComponent('minecraft:equippable').getEquipment("Mainhand");
     if (!hand) return;
     const lore = hand.getLore();
-    const veinminer = lore?.includes('Treecapitator') && woodBlocks.has(block.typeId);
-
-    if (!veinminer) {
+    const treecapitator = lore?.includes('Treecapitator') && woodBlocks.has(block.typeId);
+    const autosmelt = lore?.includes('Auto Smelting');
+    if (treecapitator) {
         const dimension = block.dimension;
-        if (woodBlocks.has(block.typeId)) {
-            system.runJob(breakTree(dimension, block));
-            e.cancel = true
-        }
+        system.runJob(breakTree(dimension, block));
+        e.cancel = true;
+    }
+    if (autosmelt) {
+        const loc = block.location;
+        dimension.getEntities({location: loc, maxDistance: 1}).forEach(entity => entity.remove());
+        system.run(() => {
+            spawnItem(dimension, oreToIngot(block), loc, 1);
+        });
     }
 });
 
-
 /**
- * 
  * @param {Dimension} dimension 
  * @param {Block} block 
  */
@@ -64,4 +67,19 @@ function* breakTree(dimension, block) {
         }
         yield;
     }
-} 
+}
+function spawnItem(Dimension, typeId, location, amount = 1) {
+    const item = new ItemStack(typeId, amount);
+    Dimension.spawnItem(item, location);
+}
+function oreToIngot(block) {
+    if (block.typeId === 'minecraft:iron_ore' && 'minecraft:deepslate_iron_ore') {
+        return 'minecraft:iron_ingot'
+    }
+    if (block.typeId === 'minecraft:gold_ore' && 'minecraft:deepslate_gold_ore') {
+        return 'minecraft:gold_ingot'
+    }
+    if (block.typeId === 'minecraft:copper_ore' && 'minecraft:deepslate_copper_ore') {
+        return 'minecraft:copper_ingot'
+    }
+}
