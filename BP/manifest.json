@@ -1,0 +1,37 @@
+{
+	"format_version": 2,
+	"header": {
+		"name": "Tree capitator",
+		"description": "Made by finnafinest_ and Cennac",
+		"uuid": "259ed2b2-2b6c-49ca-bde2-ffaf4cb47516",
+		"version": [
+			1,
+			0,
+			0
+		],
+		"min_engine_version": [
+			1,
+			21,
+			60
+		]
+	},
+	"modules": [
+		{
+			"language": "javascript",
+			"type": "script",
+			"uuid": "ccdac1c6-004e-4be0-a2e9-ddb24c6ec6df",
+			"version": [
+				1,
+				0,
+				0
+			],
+			"entry": "scripts/main.js"
+		}
+	],
+	"dependencies": [
+		{
+			"module_name": "@minecraft/server",
+			"version": "1.18.0-beta"
+		}
+	]
+}
