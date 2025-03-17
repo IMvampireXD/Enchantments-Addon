@@ -27,10 +27,19 @@ world.beforeEvents.playerBreakBlock.subscribe(e => {
         e.cancel = true;
     }
     if (autosmelt) {
-        const loc = block.location;
+        const loc = block.center()
         const blockId = block.typeId;
+        if (player.getGameMode() == "creative") return;
         system.run(() => {
-            dimension.getEntities({ location: loc, maxDistance: 1, type: "minecraft:item" }).forEach(entity => entity.remove());
+            if (oreToIngot(blockId) == null) return;
+            dimension.getEntities({ location: loc, maxDistance: 3, type: "minecraft:item", closest: 1 }).forEach(entity => {
+                const itemComponent = entity.getComponent("item");
+                if (itemComponent.itemStack.typeId == oreToRaw(blockId)) {
+                    entity.remove()
+                } else {
+                    return;
+                }
+            });
             spawnItem(dimension, oreToIngot(blockId), loc, 1);
         });
     }
@@ -87,9 +96,24 @@ function oreToIngot(blockId) {
     }
     else if (blockId === 'minecraft:copper_ore' || blockId === 'minecraft:deepslate_copper_ore') {
         return 'minecraft:copper_ingot'
+    } else {
+        return null;
     }
 }
 
+function oreToRaw(blockId) {
+    if (blockId === 'minecraft:iron_ore' || blockId === 'minecraft:deepslate_iron_ore') {
+        return 'minecraft:raw_iron'
+    }
+    else if (blockId === 'minecraft:gold_ore' || blockId === 'minecraft:deepslate_gold_ore') {
+        return 'minecraft:raw_gold'
+    }
+    else if (blockId === 'minecraft:copper_ore' || blockId === 'minecraft:deepslate_copper_ore') {
+        return 'minecraft:raw_copper'
+    } else {
+        return null;
+    }
+}
 
 // Registering recipe of TreeCapitator
 new RecipePlusPlus()
