@@ -20,7 +20,7 @@ world.beforeEvents.playerBreakBlock.subscribe(e => {
     if (!hand) return;
     const lore = hand.getLore();
     const treecapitator = lore?.includes('Treecapitator') && woodBlocks.has(block.typeId);
-    const autosmelt = lore?.includes('Hot Pickaxe');
+    const autosmelt = lore?.includes('§r§5Hot Pickaxe');
     if (treecapitator) {
         const dimension = block.dimension;
         system.runJob(breakTree(dimension, block));
@@ -95,10 +95,10 @@ function oreToIngot(blockId) {
 new RecipePlusPlus()
     .setSlot(0, "axe")
     .setSlot(1, "book:treecapitator")
-    .setResult(null, true, ["Treecapitator"]);
+    .setResult(null, true, ["Treecapitator"]);   
 
 //Registering recipe of Auto Smelting
 new RecipePlusPlus()
     .setSlot(0, "pickaxe")
     .setSlot(1, "book:autosmelting")
-    .setResult(null, true, ["Hot Pickaxe"]);
+    .setResult(null, true, ["§r§5Hot Pickaxe", "§r§o§8Auto-smelts mined ores"]);
