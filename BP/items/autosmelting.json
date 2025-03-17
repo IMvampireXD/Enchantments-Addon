@@ -8,12 +8,18 @@
             }
         },
         "components": {
+            "minecraft:creative_category": {
+				"parent": "itemGroup.name.enchantedBook"
+			},
+            "minecraft:hand_equipped": false,
             "minecraft:icon": "enchantments:enchanted_book",
             "minecraft:tags": {
                 "tags": ["minecraft:bookshelf_books"]
             },
             "minecraft:glint": true,
+            "minecraft:foil": true,
             "minecraft:max_stack_size": 1,
+            "minecraft:render_offsets": "books",
             "minecraft:display_name": {
                 "value": "§dEnchanted Book\n§7Auto Smelting\n\n§9Applicable to:\n§7Pickaxe"
             }
