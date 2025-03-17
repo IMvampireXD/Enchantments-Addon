@@ -20,7 +20,7 @@ world.beforeEvents.playerBreakBlock.subscribe(e => {
     if (!hand) return;
     const lore = hand.getLore();
     const treecapitator = lore?.includes('Treecapitator') && woodBlocks.has(block.typeId);
-    const autosmelt = lore?.includes('Auto Smelting');
+    const autosmelt = lore?.includes('Hot Pickaxe');
     if (treecapitator) {
         const dimension = block.dimension;
         system.runJob(breakTree(dimension, block));
@@ -103,4 +103,4 @@ new RecipePlusPlus()
 new RecipePlusPlus()
     .setSlot(0, "pickaxe")
     .setSlot(1, "book:autosmelting")
-    .setResult(item, true, ["Auto Smelting"]);
+    .setResult(item, true, ["Hot Pickaxe"]);
