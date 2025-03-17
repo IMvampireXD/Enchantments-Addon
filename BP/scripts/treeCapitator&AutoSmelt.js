@@ -30,7 +30,6 @@ world.beforeEvents.playerBreakBlock.subscribe(e => {
         const loc = block.location;
         const blockId = block.typeId;
         system.run(() => {
-            console.log(block.permutation.type.id)
             dimension.getEntities({ location: loc, maxDistance: 1, type: "minecraft:item" }).forEach(entity => entity.remove());
             spawnItem(dimension, oreToIngot(blockId), loc, 1);
         });
@@ -92,15 +91,14 @@ function oreToIngot(blockId) {
 }
 
 
-const item = new ItemStack("minecraft:dirt");
 // Registering recipe of TreeCapitator
 new RecipePlusPlus()
     .setSlot(0, "axe")
     .setSlot(1, "book:treecapitator")
-    .setResult(item, true, ["Treecapitator"]);
+    .setResult(null, true, ["Treecapitator"]);
 
 //Registering recipe of Auto Smelting
 new RecipePlusPlus()
     .setSlot(0, "pickaxe")
     .setSlot(1, "book:autosmelting")
-    .setResult(item, true, ["Hot Pickaxe"]);
+    .setResult(null, true, ["Hot Pickaxe"]);
