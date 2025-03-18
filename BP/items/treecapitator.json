@@ -19,7 +19,7 @@
             "minecraft:glint": true,
             "minecraft:max_stack_size": 1,
             "minecraft:display_name": {
-                "value": "§dEnchanted Book\n§7Tree Capitator\n\n§9Applicable to:\n§7Axe"
+		"value": "§eEnchanted Book\n\n§r§5Tree Capitator\n§r§o§8Cuts down entire tree by just breaking one block\n\n§9Applicable to:\n§7Axe"
             }
         }
     }
