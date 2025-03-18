@@ -19,7 +19,7 @@ world.beforeEvents.playerBreakBlock.subscribe(e => {
     const hand = player.getComponent('minecraft:equippable').getEquipment("Mainhand");
     if (!hand) return;
     const lore = hand.getLore();
-    const treecapitator = lore?.includes('Treecapitator') && woodBlocks.has(block.typeId);
+    const treecapitator = lore?.includes('§r§5Treecapitator') && woodBlocks.has(block.typeId);
     const autosmelt = lore?.includes('§r§5Hot Pickaxe');
     if (treecapitator) {
         const dimension = block.dimension;
@@ -119,7 +119,7 @@ function oreToRaw(blockId) {
 new RecipePlusPlus()
     .setSlot(0, "axe")
     .setSlot(1, "book:treecapitator")
-    .setResult(null, true, ["Treecapitator"]);   
+    .setResult(null, true, ["§r§5Treecapitator", "§r§o§8Cuts down entire tree by just breaking one block"]);   
 
 //Registering recipe of Auto Smelting
 new RecipePlusPlus()
