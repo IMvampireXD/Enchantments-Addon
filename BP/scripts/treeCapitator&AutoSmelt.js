@@ -115,14 +115,21 @@ function oreToRaw(blockId) {
     }
 }
 
-// Registering recipe of TreeCapitator
+// Registering recipes of enchantments //
+
 new RecipePlusPlus()
     .setSlot(0, "axe")
     .setSlot(1, "book:treecapitator")
     .setResult(null, true, ["§r§5Treecapitator", "§r§o§8Cuts down entire tree by just breaking one block"]);   
 
-//Registering recipe of Auto Smelting
+
 new RecipePlusPlus()
     .setSlot(0, "pickaxe")
     .setSlot(1, "book:autosmelting")
     .setResult(null, true, ["§r§5Hot Pickaxe", "§r§o§8Auto-smelts mined ores"]);
+
+
+new RecipePlusPlus()
+    .setSlot(0, "axe")
+    .setSlot(1, "book:frostaspect")
+    .setResult(null, true, ["§r§5Frost Aspect", "§r§o§8Has 20% chance of freezing mobs when hit"]);
