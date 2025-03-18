@@ -14,32 +14,30 @@ const woodBlocks = new Set([
     'minecraft:warped_stem'
 ]);
 
-world.beforeEvents.playerBreakBlock.subscribe(e => {
-    const { block, dimension, player } = e;
-    const hand = player.getComponent('minecraft:equippable').getEquipment("Mainhand");
-    if (!hand) return;
-    const lore = hand.getLore();
-    const treecapitator = lore?.includes('§r§5Treecapitator') && woodBlocks.has(block.typeId);
+world.beforeEvents.playerBreakBlock.subscribe(async ev => {
+    const { block, dimension, player } = ev;
+    const treecapitator = ev.itemStack?.getLore().includes('§r§5Treecapitator') && woodBlocks.has(block.typeId);
     const autosmelt = lore?.includes('§r§5Hot Pickaxe');
 
     // Has enchantment - treecapitator
     if (treecapitator) {
-        const dimension = block.dimension;
+        ev.cancel = true;
         system.runJob(breakTree(dimension, block));
-        e.cancel = true;
     }
 
     // Has enchantment - autosmelt
     if (autosmelt) {
-        const loc = block.center()
+        if (player.getGameMode() == "creative" || !oreToIngot(blockId)) return;
+        const loc = block.center();
         const blockId = block.typeId;
         if (player.getGameMode() == "creative") return;
 
-        // do Auto smelt
         system.run(() => {
             if (oreToIngot(blockId) == null) return;
+
             dimension.getEntities({ location: loc, maxDistance: 3, type: "minecraft:item", closest: 1 }).forEach(entity => {
                 const itemComponent = entity.getComponent("item");
+                
                 if (itemComponent.itemStack.typeId == oreToRaw(blockId)) {
                     entity.remove()
                 } else {
@@ -62,19 +60,19 @@ function* breakTree(dimension, block) {
     let toBreak = [block.location];
     let checked = new Set();
 
-    while (toBreak.length > 0) {
-        let location = toBreak.shift();
-        let key = `${location.x},${location.y},${location.z}`;
+    while (toBreak.length) {
+        let { x, y, z } = toBreak.shift();
+        let key = `${x},${y},${z}`;
         if (checked.has(key)) continue;
         checked.add(key);
 
         let currentBlock = dimension.getBlock(location);
         if (currentBlock && woodBlocks.has(currentBlock.typeId)) {
+
             system.run(() => {
                 dimension.runCommand(`setblock ${location.x} ${location.y} ${location.z} air destroy`);
             })
 
-            // Add adjacent blocks
             let adjacent = [
                 { x: location.x + 1, y: location.y, z: location.z },
                 { x: location.x - 1, y: location.y, z: location.z },
@@ -83,8 +81,6 @@ function* breakTree(dimension, block) {
                 { x: location.x, y: location.y, z: location.z + 1 },
                 { x: location.x, y: location.y, z: location.z - 1 }
             ];
-
-            // iterate
             for (let loc of adjacent) {
                 toBreak.push(loc);
             }
@@ -98,17 +94,22 @@ function spawnItem(Dimension, typeId, location, amount = 1) {
     Dimension.spawnItem(item, location);
 }
 
+
 function oreToIngot(blockId) {
-    if (blockId === 'minecraft:iron_ore' || blockId === 'minecraft:deepslate_iron_ore') {
-        return 'minecraft:iron_ingot'
-    }
-    else if (blockId === 'minecraft:gold_ore' || blockId === 'minecraft:deepslate_gold_ore') {
-        return 'minecraft:gold_ingot'
-    }
-    else if (blockId === 'minecraft:copper_ore' || blockId === 'minecraft:deepslate_copper_ore') {
-        return 'minecraft:copper_ingot'
-    } else {
-        return null;
+    switch (blockId.substring(10)) {
+        case 'iron_ore':
+        case 'deepslate_iron_ore':
+            return 'minecraft:iron_ingot';
+
+        case 'copper_ore':
+        case 'deepslate_copper_ore':
+            return 'minecraft:copper_ingot';
+
+        case 'gold_ore':
+        case 'deepslate_gold_ore':
+            return 'minecraft:gold_ingot';
+
+        default: return null;
     }
 }
 
@@ -120,9 +121,11 @@ function oreToIngot(blockId) {
 function oreToRaw(blockId) {
     if (blockId === 'minecraft:iron_ore' || blockId === 'minecraft:deepslate_iron_ore') {
         return 'minecraft:raw_iron'
-    } else if (blockId === 'minecraft:gold_ore' || blockId === 'minecraft:deepslate_gold_ore') {
+    }
+    else if (blockId === 'minecraft:gold_ore' || blockId === 'minecraft:deepslate_gold_ore') {
         return 'minecraft:raw_gold'
-    } else if (blockId === 'minecraft:copper_ore' || blockId === 'minecraft:deepslate_copper_ore') {
+    }
+    else if (blockId === 'minecraft:copper_ore' || blockId === 'minecraft:deepslate_copper_ore') {
         return 'minecraft:raw_copper'
     } else {
         return null;
@@ -134,7 +137,7 @@ function oreToRaw(blockId) {
 new RecipePlusPlus()
     .setSlot(0, "axe")
     .setSlot(1, "book:treecapitator")
-    .setResult(null, true, ["§r§5Treecapitator", "§r§o§8Cuts down entire tree by just breaking one block"]);   
+    .setResult(null, true, ["§r§5Treecapitator", "§r§o§8Cuts down entire tree by just breaking one block"]);
 
 
 new RecipePlusPlus()
