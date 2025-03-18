@@ -3,14 +3,20 @@
     "header": {
         "name": "Enchantments++",
         "description": "Made by finnafinest_ and Cennac",
-        "uuid": "163d0661-c500-4fad-8ec5-22eafcaf91",
+        "uuid": "9f8903b6-026d-45d0-a06d-cd612426b78b",
         "version": [0, 0, 1]
     },
     "modules": [
         {
             "type": "resources",
-            "uuid": "ecbbe1b0-37d5-4a43-8878-a547216885",
+            "uuid": "17710528-b213-4787-8433-4303df89ccc3",
             "version": [0, 0, 1]
         }
-    ]
+    ],
+    "dependencies": [
+		{
+			"uuid": "8c8cd4ad-41cd-4a22-9100-8de86c375a57",
+			"version": [1, 0, 0]
+		}
+	]
 }
