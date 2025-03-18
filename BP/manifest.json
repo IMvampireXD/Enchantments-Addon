@@ -3,7 +3,7 @@
 	"header": {
 		"name": "Enchantments++",
 		"description": "Made by finnafinest_ and Cennac",
-		"uuid": "259ed2b2-2b6c-49ca-bde2-ffaf4cb47516",
+		"uuid": "8c8cd4ad-41cd-4a22-9100-8de86c375a57",
 		"version": [
 			1,
 			0,
@@ -17,18 +17,35 @@
 	},
 	"modules": [
 		{
-			"language": "javascript",
-			"type": "script",
-			"uuid": "ccdac1c6-004e-4be0-a2e9-ddb24c6ec6df",
+			"type": "data",
+			"uuid": "81a4a7a7-cd6a-4abf-bc39-8678d4b90e48",
 			"version": [
 				1,
 				0,
 				0
-			],
-			"entry": "scripts/main.js"
+			]
+		},
+		{
+			"type": "script",
+			"language": "javascript",
+			"uuid": "6400588d-13a9-400c-9460-976d64535a1e",
+			"entry": "scripts/main.js",
+			"version": [
+				1,
+				0,
+				0
+			]
 		}
 	],
 	"dependencies": [
+		{
+			"uuid": "9f8903b6-026d-45d0-a06d-cd612426b78b",
+			"version": [
+				1,
+				0,
+				0
+			]
+		},
 		{
 			"module_name": "@minecraft/server",
 			"version": "1.18.0-beta"
