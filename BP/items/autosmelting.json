@@ -19,7 +19,7 @@
             "minecraft:glint": true,
             "minecraft:max_stack_size": 1,
             "minecraft:display_name": {
-                "value": "§dEnchanted Book\n§r§5Hot Pickaxe\n§r§o§8Auto-smelts mined ores\n\n§9Applicable to:\n§7Pickaxe"
+                "value": "§eEnchanted Book\n\n§r§5Hot Pickaxe\n§r§o§8Auto-smelts mined ores\n\n§9Applicable to:\n§7Pickaxe"
             }
         }
     }
