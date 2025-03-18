@@ -1,0 +1,23 @@
+{
+  "name": "enchantments-addon",
+  "version": "1.0.0",
+  "description": "Adds more enchantments in minecraft bedrock.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IMvampireXD/Enchantments-Addon.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/IMvampireXD/Enchantments-Addon/issues"
+  },
+  "homepage": "https://github.com/IMvampireXD/Enchantments-Addon#readme",
+  "dependencies": {
+    "@minecraft/server": "^1.17.0"
+  }
+}

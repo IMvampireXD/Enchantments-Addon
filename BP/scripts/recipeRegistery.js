@@ -1,4 +1,4 @@
-import { world, system, ItemStack, Block, ItemLockMode } from "@minecraft/server";
+import { world, system, ItemStack, Container } from "@minecraft/server";
 
 /**
  * 
@@ -67,74 +67,98 @@ export class RecipePlusPlus {
 }
 
 system.runInterval(() => {
+
+    // only update recipeEntites who are being used, like if a player is in its range
     const recipeEntities = world.getDimension("overworld").getEntities({
         type: "ench:recipeguy2"
     });
     
     for (const entity of recipeEntities) {
+        /** @type {Container} */
         const inv = entity.getComponent("minecraft:inventory").container;
         
-        if (!entity.hasTag("hadResult") && inv.getItem(2) && inv.getItem(2).getDynamicProperty("reciped")) {
-            entity.addTag("hadResult");
+        // Reuse for less API calls
+        let hasTag = entity.hasTag("hadResult");
+        let item_00 = inv.getItem(0) || null;
+        let item_01 = inv.getItem(1) || null;
+        let item_02 = inv.getItem(2) || null;
+        // ---
+
+        // check for recipe
+        if (!entity.hasTag("hadResult") && item_02 && item_02.getDynamicProperty("reciped")) {
+            entity.addTag("hadResult"); hasTag = true;
         }
         
-        if (entity.hasTag("hadResult") && !inv.getItem(2) && inv.getItem(0) && inv.getItem(1)) {
+        // why checking for "hadResult" if it will be always true
+        if (!item_02 && item_00 && item_01) {
             for (const recipe of RecipePlusPlus.getRecipes()) {
-                if (inv.getItem(0).typeId.includes(recipe.slots[0]) && 
-                    inv.getItem(1).typeId.includes(recipe.slots[1])) {
-                    inv.setItem(0, null);
-                    inv.setItem(1, null);
-                    entity.removeTag("hadResult");
+                if (item_00.typeId.includes(recipe.slots[0]) && 
+                item_01.typeId.includes(recipe.slots[1])) {
+                    inv.setItem(0, null); item_00 = null;
+                    inv.setItem(1, null); item_01 = null;
+                    entity.removeTag("hadResult"); hasTag = false;
                     break;
                 }
             }
         }
-        
-        if (inv.getItem(2) && !inv.getItem(2).getDynamicProperty("reciped")) {
-            entity.dimension.spawnItem(inv.getItem(2), entity.location);
-            inv.setItem(2, null);
-        }
-        
-        if (inv.getItem(2) && inv.getItem(2).getDynamicProperty("reciped") == true) {
-            if (!inv.getItem(0) || !inv.getItem(1)) {
-                inv.setItem(2, null);
-                entity.removeTag("hadResult");
+
+        // ...
+        if (item_02) {
+            if (!item_02.getDynamicProperty("reciped")) {
+                entity.dimension.spawnItem(item_02, entity.location);
+                getItem(2, null); item_02 = null;
+            } else if (!item_00 || !item_01) {
+                inv.setItem(2, null); item_02 = null;
+                entity.removeTag("hadResult"); hasTag = true;
             }
         }
-        
-        if (!inv.getItem(2) && inv.getItem(0) && inv.getItem(1) && !entity.hasTag("hadResult")) {
+
+        // no need to check for item_02 since it will be always undefined
+        if (item_00 && item_01 && !entity.hasTag("hadResult")) {
+            const itemTypeId_00 = item_00.typeId;
+            const itemTypeId_01 = item_01.typeId;
+
+            // find recipe
             for (const recipe of RecipePlusPlus.getRecipes()) {
-                if (inv.getItem(0).typeId.includes(recipe.slots[0]) && 
-                    inv.getItem(1).typeId.includes(recipe.slots[1])) {
-                    
+                if (itemTypeId_00.includes(recipe.slots[0]) && itemTypeId_01.includes(recipe.slots[1])) {
                     const resultToPut = recipe.result;
+
                     if (recipe.input) {
-                        const itemToAdd = new ItemStack(inv.getItem(0).typeId, 1);
+                        const itemToAdd = new ItemStack(itemTypeId_00, 1);
                         itemToAdd.setLore(recipe.lore);
                         itemToAdd.setDynamicProperty("reciped", true);
-                        inv.setItem(2, itemToAdd);
+                        inv.setItem(2, itemToAdd); // item_02 = itemToAdd;
                     } else {
                         resultToPut.setDynamicProperty("reciped", true);
-                        inv.setItem(2, resultToPut);
+                        inv.setItem(2, resultToPut); // item_02 = resultToPut;
                     }
+
                     break;
                 }
             }
         }
     }
 
+    // Iterate all players, better buffer players who interact with the entity.
     for (const player of world.getPlayers()) {
         const inv = player.getComponent("minecraft:inventory").container;
-        for (let i = 0; i < inv.size; i++) {
-            const item = inv.getItem(i);
+        const invSize = inv.size;
+
+        for (let i = 0; i < invSize; i++) {
+            const item = getItem(i);
+
+            // are you sure you mean "return" instead of continue/break ?
             if (!item) return;
+
             if (item.getDynamicProperty("reciped") !== undefined) {
                 item.setDynamicProperty("reciped");
                 inv.setItem(i, item);
             }
         }
     }
-});
+}, 10);
+
+// Add a tickDelay because of lag
 
 
 world.afterEvents.entityHitEntity.subscribe(e => {
@@ -143,8 +167,8 @@ world.afterEvents.entityHitEntity.subscribe(e => {
     if (victim.typeId == "ench:recipeguy2") {
         const inv = victim.getComponent("minecraft:inventory").container;
         inv.setItem(2, null)
-        inv.getItem(0) && victim.dimension.spawnItem(inv.getItem(0), victim.location);
-        inv.getItem(1) && victim.dimension.spawnItem(inv.getItem(1), victim.location);
+        inv.item_00 && victim.dimension.spawnItem(inv.item_00, victim.location);
+        inv.item_01 && victim.dimension.spawnItem(inv.item_01, victim.location);
         victim.runCommand("setblock ~~~ air destroy");
         victim.remove();
     }

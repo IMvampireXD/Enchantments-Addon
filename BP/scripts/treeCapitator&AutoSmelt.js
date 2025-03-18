@@ -21,15 +21,21 @@ world.beforeEvents.playerBreakBlock.subscribe(e => {
     const lore = hand.getLore();
     const treecapitator = lore?.includes('§r§5Treecapitator') && woodBlocks.has(block.typeId);
     const autosmelt = lore?.includes('§r§5Hot Pickaxe');
+
+    // Has enchantment - treecapitator
     if (treecapitator) {
         const dimension = block.dimension;
         system.runJob(breakTree(dimension, block));
         e.cancel = true;
     }
+
+    // Has enchantment - autosmelt
     if (autosmelt) {
         const loc = block.center()
         const blockId = block.typeId;
         if (player.getGameMode() == "creative") return;
+
+        // do Auto smelt
         system.run(() => {
             if (oreToIngot(blockId) == null) return;
             dimension.getEntities({ location: loc, maxDistance: 3, type: "minecraft:item", closest: 1 }).forEach(entity => {
@@ -40,6 +46,7 @@ world.beforeEvents.playerBreakBlock.subscribe(e => {
                     return;
                 }
             });
+
             spawnItem(dimension, oreToIngot(blockId), loc, 1);
         });
     }
@@ -66,6 +73,8 @@ function* breakTree(dimension, block) {
             system.run(() => {
                 dimension.runCommand(`setblock ${location.x} ${location.y} ${location.z} air destroy`);
             })
+
+            // Add adjacent blocks
             let adjacent = [
                 { x: location.x + 1, y: location.y, z: location.z },
                 { x: location.x - 1, y: location.y, z: location.z },
@@ -74,6 +83,8 @@ function* breakTree(dimension, block) {
                 { x: location.x, y: location.y, z: location.z + 1 },
                 { x: location.x, y: location.y, z: location.z - 1 }
             ];
+
+            // iterate
             for (let loc of adjacent) {
                 toBreak.push(loc);
             }
@@ -101,14 +112,17 @@ function oreToIngot(blockId) {
     }
 }
 
+/**
+ * 
+ * @param {string} blockId 
+ * @returns {string | null}
+ */
 function oreToRaw(blockId) {
     if (blockId === 'minecraft:iron_ore' || blockId === 'minecraft:deepslate_iron_ore') {
         return 'minecraft:raw_iron'
-    }
-    else if (blockId === 'minecraft:gold_ore' || blockId === 'minecraft:deepslate_gold_ore') {
+    } else if (blockId === 'minecraft:gold_ore' || blockId === 'minecraft:deepslate_gold_ore') {
         return 'minecraft:raw_gold'
-    }
-    else if (blockId === 'minecraft:copper_ore' || blockId === 'minecraft:deepslate_copper_ore') {
+    } else if (blockId === 'minecraft:copper_ore' || blockId === 'minecraft:deepslate_copper_ore') {
         return 'minecraft:raw_copper'
     } else {
         return null;
