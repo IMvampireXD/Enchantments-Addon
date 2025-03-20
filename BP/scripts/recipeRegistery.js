@@ -28,7 +28,6 @@ export class RecipePlusPlus {
         this.input = false;
         this.lore = [];
 
-
         RecipePlusPlus.recipes.push(this);
     }
 
@@ -66,55 +65,51 @@ export class RecipePlusPlus {
     }
 }
 
+// Registering recipes of enchantments
+// would highly advise of putting this in another file, same goes with the class - jeanmajid
+
+new RecipePlusPlus()
+    .setSlot(0, "axe")
+    .setSlot(1, "book:treecapitator")
+    .setResult(null, true, ["§r§5Treecapitator", "§r§o§8Cut down entire trees with one cut"]);
+
+
+new RecipePlusPlus()
+    .setSlot(0, "pickaxe")
+    .setSlot(1, "book:autosmelting")
+    .setResult(null, true, ["§r§5Hot Pickaxe", "§r§o§8Auto-smelts mined ores"]);
+
+
+new RecipePlusPlus()
+    .setSlot(0, "axe")
+    .setSlot(1, "book:frostaspect")
+    .setResult(null, true, ["§r§5Frost Aspect", "§r§o§8Has 20% chance of freezing mobs when hit"]);
+
+
 system.runInterval(() => {
+    // only works in overworld either loop through all dimensions or
+    // just give the enitity an tick component and make it call an script event - jeanmajid
 
     // only update recipeEntites who are being used, like if a player is in its range
     const recipeEntities = world.getDimension("overworld").getEntities({
-        type: "ench:recipeguy2"
+        type: "ench:recipeguy2",
     });
-    
+
     for (const entity of recipeEntities) {
         /** @type {Container} */
         const inv = entity.getComponent("minecraft:inventory").container;
-        
+
         // Reuse for less API calls
-        let hasTag = entity.hasTag("hadResult");
         let item_00 = inv.getItem(0) || null;
         let item_01 = inv.getItem(1) || null;
         let item_02 = inv.getItem(2) || null;
         // ---
 
-        // check for recipe
-        if (!entity.hasTag("hadResult") && item_02 && item_02.getDynamicProperty("reciped")) {
-            entity.addTag("hadResult"); hasTag = true;
-        }
-        
-        // why checking for "hadResult" if it will be always true
-        if (!item_02 && item_00 && item_01) {
-            for (const recipe of RecipePlusPlus.getRecipes()) {
-                if (item_00.typeId.includes(recipe.slots[0]) && 
-                item_01.typeId.includes(recipe.slots[1])) {
-                    inv.setItem(0, null); item_00 = null;
-                    inv.setItem(1, null); item_01 = null;
-                    entity.removeTag("hadResult"); hasTag = false;
-                    break;
-                }
-            }
-        }
-
-        // ...
         if (item_02) {
-            if (!item_02.getDynamicProperty("reciped")) {
-                entity.dimension.spawnItem(item_02, entity.location);
-                getItem(2, null); item_02 = null;
-            } else if (!item_00 || !item_01) {
-                inv.setItem(2, null); item_02 = null;
-                entity.removeTag("hadResult"); hasTag = true;
-            }
+            return;
         }
 
-        // no need to check for item_02 since it will be always undefined
-        if (item_00 && item_01 && !entity.hasTag("hadResult")) {
+        if (item_00 && item_01) {
             const itemTypeId_00 = item_00.typeId;
             const itemTypeId_01 = item_01.typeId;
 
@@ -127,33 +122,17 @@ system.runInterval(() => {
                         const itemToAdd = new ItemStack(itemTypeId_00, 1);
                         itemToAdd.setLore(recipe.lore);
                         itemToAdd.setDynamicProperty("reciped", true);
-                        inv.setItem(2, itemToAdd); // item_02 = itemToAdd;
+                        inv.setItem(2, itemToAdd);
                     } else {
                         resultToPut.setDynamicProperty("reciped", true);
-                        inv.setItem(2, resultToPut); // item_02 = resultToPut;
+                        inv.setItem(2, resultToPut);
                     }
+
+                    inv.setItem(0, undefined);
+                    inv.setItem(1, undefined);
 
                     break;
                 }
-            }
-        }
-    }
-
-    // Iterate all players, better buffer players who interact with the entity.
-    for (const player of world.getPlayers()) {
-        const inv = player.getComponent("minecraft:inventory").container;
-        const invSize = inv.size;
-
-        for (let i = 0; i < invSize; i++) {
-            
-            const item = inv.getItem(i);
-
-            // are you sure you mean "return" instead of continue/break ?
-            if (!item) return;
-
-            if (item.getDynamicProperty("reciped") !== undefined) {
-                item.setDynamicProperty("reciped");
-                inv.setItem(i, item);
             }
         }
     }
@@ -161,30 +140,24 @@ system.runInterval(() => {
 
 // Add a tickDelay because of lag
 
+world.afterEvents.entityHitEntity.subscribe(({ hitEntity: victim }) => {
+    if (victim.typeId !== "ench:recipeguy2") return;
 
-world.afterEvents.entityHitEntity.subscribe(e => {
-    const { damagingEntity: attacker, hitEntity: victim } = e;
+    const inv = victim.getComponent("minecraft:inventory").container;
+    inv.setItem(2, null);
+    inv.item_00 && victim.dimension.spawnItem(inv.item_00, victim.location);
+    inv.item_01 && victim.dimension.spawnItem(inv.item_01, victim.location);
+    victim.runCommand("setblock ~~~ air destroy");
+    victim.remove();
+});
 
-    if (victim.typeId == "ench:recipeguy2") {
-        const inv = victim.getComponent("minecraft:inventory").container;
-        inv.setItem(2, null)
-        inv.item_00 && victim.dimension.spawnItem(inv.item_00, victim.location);
-        inv.item_01 && victim.dimension.spawnItem(inv.item_01, victim.location);
-        victim.runCommand("setblock ~~~ air destroy");
-        victim.remove();
-    }
-})
+world.afterEvents.playerPlaceBlock.subscribe(({ block }) => {
+    if (block.typeId !== "minecraft:chest") return;
 
-world.afterEvents.playerPlaceBlock.subscribe(e => {
-    const { block, player } = e;
-
-    if (block.typeId == "minecraft:chest") {
-        const enchGuy = block.dimension.spawnEntity("ench:recipeguy2", {
-            x: block.location.x + 0.5,
-            y: block.location.y + 0.5,
-            z: block.location.z + 0.5
-        })
-        enchGuy.nameTag = "§t§e§s§t§r"
-    }
-})
-
+    const enchGuy = block.dimension.spawnEntity("ench:recipeguy2", {
+        x: block.location.x + 0.5,
+        y: block.location.y + 0.5,
+        z: block.location.z + 0.5,
+    });
+    enchGuy.nameTag = "§t§e§s§t§r";
+});
