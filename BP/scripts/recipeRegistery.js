@@ -145,7 +145,8 @@ system.runInterval(() => {
         const invSize = inv.size;
 
         for (let i = 0; i < invSize; i++) {
-            const item = getItem(i);
+            
+            const item = inv.getItem(i);
 
             // are you sure you mean "return" instead of continue/break ?
             if (!item) return;
