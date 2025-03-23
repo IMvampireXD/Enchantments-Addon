@@ -1,32 +1,23 @@
-import { world, system, Dimension, Block, ItemStack } from '@minecraft/server';
+import { world, system, Dimension, Block, ItemStack, Player } from '@minecraft/server';
 import { RecipePlusPlus } from './recipeRegistery';
-
-const woodBlocks = new Set([
-    'minecraft:oak_log',
-    'minecraft:spruce_log',
-    'minecraft:birch_log',
-    'minecraft:jungle_log',
-    'minecraft:acacia_log',
-    'minecraft:dark_oak_log',
-    'minecraft:mangrove_log',
-    'minecraft:cherry_log',
-    'minecraft:crimson_stem',
-    'minecraft:warped_stem'
-]);
 
 world.beforeEvents.playerBreakBlock.subscribe(async ev => {
     const { block, dimension, player } = ev;
-    const treecapitator = ev.itemStack?.getLore().includes('§r§5Treecapitator') && woodBlocks.has(block.typeId);
-    const autosmelt = lore?.includes('§r§5Hot Pickaxe');
 
-    // Has enchantment - treecapitator
-    if (treecapitator) {
+    const lores = ev.itemStack?.getLore();
+    if (lores.length === 0) return;
+
+    const treeCapitator = lores.includes('§r§5Treecapitator') && woodBlocks.has(block.typeId);
+    const autoSmelt = lores.includes('§r§5Hot Pickaxe');
+
+    // Has enchantment - treeCapitator
+    if (treeCapitator) {
         ev.cancel = true;
         system.runJob(breakTree(dimension, block));
     }
 
-    // Has enchantment - autosmelt
-    if (autosmelt) {
+    // Has enchantment - autoSmelt
+    if (autoSmelt) {
         if (player.getGameMode() == "creative" || !oreToIngot(blockId)) return;
         const loc = block.center();
         const blockId = block.typeId;
@@ -50,6 +41,24 @@ world.beforeEvents.playerBreakBlock.subscribe(async ev => {
     }
 });
 
+//  Player hit entity  //
+world.afterEvents.entityHitEntity.subscribe((event) => {
+    const {
+        damagingEntity: player,
+        hitEntity: victim,
+    } = event;
+
+    const lores = getHoldingItem(player);
+    if (lores === null || lores.length === 0) return;
+
+    const isFrostAspect = lores.includes('§r§5Frost Aspect');
+
+    if (isFrostAspect && Math.floor(Math.random()) < 0.05) {
+        // freeze Victim
+    }
+}, {
+    entityTypes: ["minecraft:player"]
+});
 
 /**
  * 
@@ -94,6 +103,14 @@ function spawnItem(Dimension, typeId, location, amount = 1) {
     Dimension.spawnItem(item, location);
 }
 
+/**
+ * @param {Player} player 
+ * @returns {ItemStack | null}
+ */
+function getHoldingItem(player) {
+    return (player.getComponent("minecraft:equippable")?.getEquipment("Mainhand")) || null;
+}
+
 
 function oreToIngot(blockId) {
     switch (blockId.substring(10)) {
@@ -119,20 +136,25 @@ function oreToIngot(blockId) {
  * @returns {string | null}
  */
 function oreToRaw(blockId) {
-    if (blockId === 'minecraft:iron_ore' || blockId === 'minecraft:deepslate_iron_ore') {
-        return 'minecraft:raw_iron'
-    }
-    else if (blockId === 'minecraft:gold_ore' || blockId === 'minecraft:deepslate_gold_ore') {
-        return 'minecraft:raw_gold'
-    }
-    else if (blockId === 'minecraft:copper_ore' || blockId === 'minecraft:deepslate_copper_ore') {
-        return 'minecraft:raw_copper'
-    } else {
-        return null;
+    switch (blockId.substring(10)) {
+        case 'iron_ore':
+        case 'deepslate_iron_ore':
+            return 'minecraft:raw_iron';
+
+        case 'copper_ore':
+        case 'deepslate_copper_ore':
+            return 'minecraft:raw_copper';
+
+        case 'gold_ore':
+        case 'deepslate_gold_ore':
+            return 'minecraft:raw_gold';
+
+        default: return null;
     }
 }
 
-// Registering recipes of enchantments //
+
+//  Registering recipes of enchantments  //
 
 new RecipePlusPlus()
     .setSlot(0, "axe")

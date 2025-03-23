@@ -1,2 +1,2 @@
-import './treeCapitator&AutoSmelt'
+import './itemEvents'
 import './recipeRegistery'

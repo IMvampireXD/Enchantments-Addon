@@ -1,0 +1,4 @@
+> Usage of Item dynamicProperties instead of just using the item lores.
+> ItemEnchantment and ItemEventHandler / ItemActionHandler.
+> ? only register needed events when item have been equipped.
+  - Could cause performance issues.

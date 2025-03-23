@@ -85,7 +85,7 @@ system.runInterval(() => {
         // ---
 
         // check for recipe
-        if (!entity.hasTag("hadResult") && item_02 && item_02.getDynamicProperty("reciped")) {
+        if (!hasTag && item_02 && item_02.getDynamicProperty("reciped")) {
             entity.addTag("hadResult"); hasTag = true;
         }
         
@@ -114,7 +114,7 @@ system.runInterval(() => {
         }
 
         // no need to check for item_02 since it will be always undefined
-        if (item_00 && item_01 && !entity.hasTag("hadResult")) {
+        if (item_00 && item_01 && !hasTag) {
             const itemTypeId_00 = item_00.typeId;
             const itemTypeId_01 = item_01.typeId;
 
@@ -163,7 +163,7 @@ system.runInterval(() => {
 
 
 world.afterEvents.entityHitEntity.subscribe(e => {
-    const { damagingEntity: attacker, hitEntity: victim } = e;
+    const { damagingEntity: _attacker, hitEntity: victim } = e;
 
     if (victim.typeId == "ench:recipeguy2") {
         const inv = victim.getComponent("minecraft:inventory").container;
@@ -176,7 +176,7 @@ world.afterEvents.entityHitEntity.subscribe(e => {
 })
 
 world.afterEvents.playerPlaceBlock.subscribe(e => {
-    const { block, player } = e;
+    const { block, _player } = e;
 
     if (block.typeId == "minecraft:chest") {
         const enchGuy = block.dimension.spawnEntity("ench:recipeguy2", {
