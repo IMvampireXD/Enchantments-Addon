@@ -12,7 +12,7 @@ Sword Enchantments:
 - Frost Aspect III (10% chance of freezing mobs when hit)
 
 Pickaxe Enchantments:
-- Auto Smelting (Automatically smelts ores when broken) (Max level 1)
+- Hot Pickaxe (Automatically smelts ores when broken) (Max level 1)
 
 Axe Enchantments:
 - Treecapitator (Breaks the whole tree by just breaking one block) (Max level 1)
